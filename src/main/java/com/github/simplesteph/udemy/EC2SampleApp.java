@@ -7,6 +7,8 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.NumberFormat;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +18,7 @@ import static spark.Spark.threadPool;
 public class EC2SampleApp {
 
     private static List<String> myBigList = new ArrayList<>();
+    private static List<String> activeThreads = new ArrayList<>();
     private static Boolean isHealthy = true;
 
     public static void main(String[] args) {
@@ -26,6 +29,7 @@ public class EC2SampleApp {
         threadPool(maxThreads, minThreads, timeOutMillis);
 
         get("/", EC2SampleApp::hello);
+        get("/latency", EC2SampleApp::latency);
         get("/cpu", EC2SampleApp::cpu);
         get("/ram", EC2SampleApp::ram);
         get("/ram/info", EC2SampleApp::ramInfo);
@@ -45,11 +49,41 @@ public class EC2SampleApp {
         return sb.toString();
     }
 
+    private static String latency(Request request, Response response) throws UnknownHostException, InterruptedException {
+
+        StringBuilder sb = new StringBuilder();
+        String myHostname = InetAddress.getLocalHost().getHostName();
+        sb.append("Hello World By: ").append(myHostname).append("<br/>");
+        String sourceIP = request.ip();
+        sb.append("Receive Request From: ").append(sourceIP).append("<br/>");
+        ThreadHandler t = new ThreadHandler();
+        sb.append("Time taken: ").append(t.manageThread()).append("<br/>");
+        return sb.toString();
+    }
 
     private static String cpu(Request request, Response response) {
         long currentTime = System.currentTimeMillis();
         BigInteger computation = fib(10000);
         return "fib function took " + (System.currentTimeMillis() - currentTime) + " milliseconds";
+    }
+
+    static long digSum(long n)
+    {
+        int sum = 0;
+
+        // Loop to do sum while
+        // sum is not less than
+        // or equal to 9
+        while (n > 0 || sum > 9)
+        {
+            if (n == 0) {
+                n = sum;
+                sum = 0;
+            }
+            sum += n % 10;
+            n /= 10;
+        }
+        return sum;
     }
 
 
