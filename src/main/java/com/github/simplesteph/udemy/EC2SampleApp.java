@@ -1,5 +1,7 @@
 package com.github.simplesteph.udemy;
 
+import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
 import spark.Request;
 import spark.Response;
 
@@ -20,6 +22,8 @@ public class EC2SampleApp {
     private static List<String> myBigList = new ArrayList<>();
     private static List<String> activeThreads = new ArrayList<>();
     private static Boolean isHealthy = true;
+    final static AmazonCloudWatch cw =
+            AmazonCloudWatchClientBuilder.defaultClient();
 
     public static void main(String[] args) {
 
@@ -37,6 +41,7 @@ public class EC2SampleApp {
         get("/health", EC2SampleApp::health);
         get("/health/flip", EC2SampleApp::flipHealth);
         get("/details", EC2SampleApp::details);
+
     }
 
     private static String hello(Request request, Response response) throws UnknownHostException {
@@ -52,12 +57,17 @@ public class EC2SampleApp {
     private static String latency(Request request, Response response) throws UnknownHostException, InterruptedException {
 
         StringBuilder sb = new StringBuilder();
+        long timeTaken = System.currentTimeMillis();
+        CloudWatchMetricsPublisher metricsPublisher = new CloudWatchMetricsPublisher();
         String myHostname = InetAddress.getLocalHost().getHostName();
         sb.append("Hello World By: ").append(myHostname).append("<br/>");
         String sourceIP = request.ip();
         sb.append("Receive Request From: ").append(sourceIP).append("<br/>");
         ThreadHandler t = new ThreadHandler();
         sb.append("Time taken: ").append(t.manageThread()).append("<br/>");
+
+        metricsPublisher.publishResponseTime("latency",System.currentTimeMillis()-timeTaken, cw);
+
         return sb.toString();
     }
 
