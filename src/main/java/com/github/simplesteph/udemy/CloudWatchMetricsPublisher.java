@@ -13,7 +13,7 @@ public class CloudWatchMetricsPublisher{
     public void publishResponseTime(String apiName, long milliSeconds, AmazonCloudWatch cw){
 
         Dimension dimension = new Dimension()
-                .withName("Api_name")
+                .withName("API")
                 .withValue(apiName);
 
         MetricDatum datum = new MetricDatum()

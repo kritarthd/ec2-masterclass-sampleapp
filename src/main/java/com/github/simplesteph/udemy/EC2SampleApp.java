@@ -1,5 +1,6 @@
 package com.github.simplesteph.udemy;
 
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
 import spark.Request;
@@ -23,7 +24,9 @@ public class EC2SampleApp {
     private static List<String> activeThreads = new ArrayList<>();
     private static Boolean isHealthy = true;
     final static AmazonCloudWatch cw =
-            AmazonCloudWatchClientBuilder.defaultClient();
+            AmazonCloudWatchClientBuilder.standard()
+                .withRegion(Regions.US_EAST_1)
+                .build();
 
     public static void main(String[] args) {
 
